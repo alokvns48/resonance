@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum VoiceVarient {
+  SYSTEM
+  CUSTOM
+}
+
+enum VoiceCatgory {
+  AUDIOBOOK
+  CONVERTATIONAL
+  CUSTOMER_SERVICE
+  GENERAL
+  NARRATIVE
+  CHARACTERS
+  MEDITATION
+  MOTIVATIONAL
+  ADVERTISING
+  PODCAST
+  VOICEOVER
+  CORPORATE
+}
+
+model Voice {
+  id String   @id @default(cuid())
+
+  orgId         String?
+
+  name          String
+  description   String?
+  category      VoiceCatgory @default(GENERAL)
+  language      String       @default("en-US")
+  varient       VoiceVarient 
+  r2ObjectKey   String?
+ 
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  generations   Generation[]
+
+  @@index([varient])
+  @@index([orgId])
+}
+
+model Generation {
+  id String  @id @default(cuid())
+
+  orgId         String
+
+  voiceId       String?
+  voice         Voice?  @relation(fields: [voiceId], references: [id], onDelete: SetNull)
+
+  voiceName     String
+  text          String
+  r2ObjectKey   String?
+  temprature    Float
+  topP          Float
+  topK          Float
+  repetitionPenalty Float
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([voiceId])
+
+}
